@@ -1045,3 +1045,20 @@ function escapeHtml(
   );
 
 }
+async function testConnectionNow() {
+  try {
+    const res = await testAPI();
+
+    alert(
+      res && res.ok
+        ? "เชื่อม API สำเร็จ ✅\n" + res.message
+        : "เชื่อมได้ แต่ API ตอบผิดพลาด ❌"
+    );
+
+    console.log(res);
+
+  } catch (e) {
+    alert("เชื่อม API ไม่สำเร็จ ❌\n" + e.message);
+    console.error(e);
+  }
+}
