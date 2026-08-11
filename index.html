@@ -1,98 +1,186 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
+
   <meta charset="UTF-8">
 
-  <meta name="viewport"
-        content="width=device-width,
-        initial-scale=1,
-        maximum-scale=1,
-        user-scalable=no">
+  <meta
+    name="viewport"
+    content="width=device-width,
+    initial-scale=1,
+    maximum-scale=1,
+    user-scalable=no">
 
-  <title>Asset QR Scanner</title>
+  <title>Asset Warehouse</title>
 
-  <link rel="stylesheet" href="style.css">
+  <link
+    rel="stylesheet"
+    href="style.css">
 
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script
+    src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js">
+  </script>
+
 </head>
+
 
 <body>
 
-  <div class="app">
-
-    <h1>Asset QR Scanner</h1>
-
-    <p class="sub">
-      ทดสอบกล้องมือถือก่อนเชื่อมระบบคลัง
-    </p>
+<div class="app">
 
 
-    <div class="card">
+  <!-- HEADER -->
 
-      <button
-        id="openBtn"
-        class="primary"
-        onclick="openScanner()">
+  <div style="margin-bottom:18px;">
 
-        📷 เปิดกล้องสแกน QR
+    <h1 style="margin-bottom:4px;">
+      Asset Warehouse
+    </h1>
 
-      </button>
-<button onclick="testConnectionNow()">
-  🔌 ทดสอบ API
-</button>
-      <button
-        id="closeBtn"
-        class="danger hidden"
-        onclick="closeScanner()">
+    <div class="sub">
+      QR Asset Management
+    </div>
 
-        ✕ ปิดกล้อง
+  </div>
 
-      </button>
 
+
+  <!-- SCANNER -->
+
+  <div class="card">
+
+    <button
+      id="openBtn"
+      class="primary"
+      onclick="openScanner()">
+
+      📷 สแกน Asset QR
+
+    </button>
+
+
+    <button
+      id="closeBtn"
+      class="danger hidden"
+      onclick="closeScanner()">
+
+      ✕ ปิดกล้อง
+
+    </button>
+
+
+    <div
+      id="readerBox"
+      class="hidden">
 
       <div
-        id="readerBox"
-        class="hidden">
+        style="
+          text-align:center;
+          margin:10px 0;
+          font-weight:bold;
+        ">
 
-        <div id="reader"></div>
+        นำ QR Asset Tag เข้าในกรอบ
 
       </div>
 
-    </div>
 
-
-    <div class="card">
-
-      <h2>ค่าที่อ่านได้</h2>
-
-      <div
-        id="result"
-        class="result">
-
-        ยังไม่ได้สแกน
-
-      </div>
-
-    </div>
-
-
-    <div class="card">
-
-      <label>
-        Asset Tag
-      </label>
-
-      <input
-        id="assetTag"
-        type="text"
-        placeholder="ค่าจาก QR จะมาอยู่ตรงนี้">
+      <div id="reader"></div>
 
     </div>
 
   </div>
 
+
+
+  <!-- RESULT -->
+
+  <div class="card">
+
+    <h2>
+      ข้อมูล Asset
+    </h2>
+
+
+    <div
+      id="result"
+      class="result">
+
+      <div
+        style="
+          padding:25px 10px;
+          text-align:center;
+        ">
+
+        <div
+          style="
+            font-size:50px;
+            margin-bottom:15px;
+          ">
+          ▦
+        </div>
+
+
+        <div
+          style="
+            font-size:20px;
+            font-weight:bold;
+          ">
+
+          พร้อมสแกน Asset Tag
+
+        </div>
+
+
+        <div
+          style="
+            color:#6b7680;
+            font-size:14px;
+            margin-top:8px;
+          ">
+
+          กดปุ่มด้านบนแล้วสแกน QR
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- ASSET TAG -->
+
+  <div class="card">
+
+    <label>
+      Asset Tag
+    </label>
+
+
+    <input
+      id="assetTag"
+      type="text"
+      placeholder="ค่าจาก QR จะมาอยู่ตรงนี้"
+      readonly>
+
+  </div>
+
+
+</div>
+
+
+
+<!-- สำคัญ: save.js ต้องมาก่อน -->
+
 <script src="save.js"></script>
+
 <script src="script.js"></script>
 
+
 </body>
+
 </html>
