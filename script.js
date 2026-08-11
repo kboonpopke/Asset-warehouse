@@ -6,167 +6,67 @@ let scanLock = false;
    INIT
 ========================= */
 
-document.addEventListener(
-  "DOMContentLoaded",
-  function(){
-
-    testConnection();
-
-  }
-);
-
+document.addEventListener("DOMContentLoaded", function () {
+  console.log("Asset Warehouse Ready");
+});
 
 
 /* =========================
-   TEST API
+   OPEN CAMERA
 ========================= */
 
-async function testConnection(){
+function openScanner() {
 
-  try{
-
-    const res =
-      await testAPI();
-
-    console.log(
-      "API:",
-      res
-    );
-
-    if(
-      res &&
-      res.ok
-    ){
-
-      console.log(
-        "Asset Warehouse API Online"
-      );
-
-    }
-
-  }
-  catch(e){
-
-    console.error(
-      "API ERROR:",
-      e
-    );
-
-  }
-
-}
-
-
-
-/* =========================
-   OPEN QR SCANNER
-========================= */
-
-function openScanner(){
-
-  if(scanner){
+  if (scanner) {
     return;
   }
 
-
-  if(
-    typeof Html5Qrcode ===
-    "undefined"
-  ){
-
-    alert(
-      "โหลดระบบ QR ไม่สำเร็จ"
-    );
-
+  if (typeof Html5Qrcode === "undefined") {
+    alert("โหลดระบบ QR ไม่สำเร็จ");
     return;
-
   }
 
+  document
+    .getElementById("readerBox")
+    .classList.remove("hidden");
 
   document
-    .getElementById(
-      "readerBox"
-    )
-    .classList
-    .remove(
-      "hidden"
-    );
-
+    .getElementById("openBtn")
+    .classList.add("hidden");
 
   document
-    .getElementById(
-      "openBtn"
-    )
-    .classList
-    .add(
-      "hidden"
-    );
+    .getElementById("closeBtn")
+    .classList.remove("hidden");
 
 
-  document
-    .getElementById(
-      "closeBtn"
-    )
-    .classList
-    .remove(
-      "hidden"
-    );
+  scanLock = false;
 
 
-  scanLock =
-    false;
-
-
-  scanner =
-    new Html5Qrcode(
-      "reader"
-    );
+  scanner = new Html5Qrcode("reader");
 
 
   const config = {
 
     fps: 10,
 
-    qrbox:
-      function(
-        width,
-        height
-      ){
+    qrbox: function (width, height) {
 
-        let size =
-          Math.min(
-            width,
-            height
-          ) * 0.7;
+      let size =
+        Math.min(width, height) * 0.7;
 
+      size =
+        Math.floor(size);
 
-        size =
-          Math.floor(
-            size
-          );
-
-
-        if(
-          size > 280
-        ){
-
-          size =
-            280;
-
-        }
-
-
-        return {
-
-          width:
-            size,
-
-          height:
-            size
-
-        };
-
+      if (size > 280) {
+        size = 280;
       }
+
+      return {
+        width: size,
+        height: size
+      };
+
+    }
 
   };
 
@@ -175,192 +75,128 @@ function openScanner(){
     .start(
 
       {
-        facingMode:
-          "environment"
+        facingMode: "environment"
       },
 
       config,
 
       onScanSuccess,
 
-      function(error){
-
-        // ไม่ต้องแสดง error
-        // ตอนกล้องกำลังหา QR
-
+      function () {
+        // ไม่ต้องแสดง error ตอนยังหา QR ไม่เจอ
       }
 
     )
 
-    .then(
-      function(){
+    .then(function () {
 
-        console.log(
-          "Camera started"
-        );
+      console.log("Camera started");
 
-      }
-    )
+    })
 
-    .catch(
-      function(error){
+    .catch(function (error) {
 
-        console.error(
-          error
-        );
+      console.error(error);
 
+      alert(
+        "เปิดกล้องไม่ได้\n" +
+        error
+      );
 
-        alert(
-          "เปิดกล้องไม่ได้: " +
-          error
-        );
+      scanner = null;
 
+      resetScannerUI();
 
-        resetScannerUI();
-
-
-        scanner =
-          null;
-
-      }
-    );
+    });
 
 }
-
 
 
 /* =========================
    SCAN SUCCESS
 ========================= */
 
-async function onScanSuccess(
-  decodedText,
-  decodedResult
-){
+async function onScanSuccess(decodedText) {
 
-  if(
-    scanLock
-  ){
-
+  if (scanLock) {
     return;
-
   }
 
-
-  scanLock =
-    true;
+  scanLock = true;
 
 
-  let value =
-    String(
-      decodedText || ""
-    )
-    .trim();
+  let assetTag =
+    String(decodedText || "").trim();
 
 
-  value =
-    cleanQRValue(
-      value
-    );
+  assetTag =
+    cleanQRValue(assetTag);
 
 
   document
-    .getElementById(
-      "result"
-    )
-    .textContent =
-      value;
+    .getElementById("assetTag")
+    .value = assetTag;
 
 
   document
-    .getElementById(
-      "assetTag"
-    )
-    .value =
-      value;
+    .getElementById("result")
+    .innerHTML =
+      "อ่าน QR ได้<br><b>" +
+      escapeHtml(assetTag) +
+      "</b>";
 
 
-  try{
+  try {
 
-    if(
-      navigator.vibrate
-    ){
-
-      navigator.vibrate(
-        100
-      );
-
+    if (navigator.vibrate) {
+      navigator.vibrate(100);
     }
 
-  }
-  catch(e){}
+  } catch (e) {}
 
 
   await closeScanner();
 
 
-  await findAsset(
-    value
-  );
+  findAsset(assetTag);
 
 }
-
 
 
 /* =========================
    CLEAN QR
 ========================= */
 
-function cleanQRValue(
-  value
-){
+function cleanQRValue(value) {
 
   let v =
-    String(
-      value || ""
-    )
-    .trim();
+    String(value || "").trim();
 
 
-  try{
+  try {
 
-    if(
-      v.startsWith(
-        "http://"
-      ) ||
-      v.startsWith(
-        "https://"
-      )
-    ){
+    if (
+      v.startsWith("http://") ||
+      v.startsWith("https://")
+    ) {
 
       const url =
         new URL(v);
 
 
       const tag =
-        url.searchParams.get(
-          "asset"
-        )
-        ||
-        url.searchParams.get(
-          "tag"
-        )
-        ||
-        url.searchParams.get(
-          "assetTag"
-        );
+        url.searchParams.get("asset") ||
+        url.searchParams.get("tag") ||
+        url.searchParams.get("assetTag");
 
 
-      if(tag){
-
+      if (tag) {
         return tag.trim();
-
       }
 
     }
 
-  }
-  catch(e){}
+  } catch (e) {}
 
 
   return v;
@@ -368,46 +204,33 @@ function cleanQRValue(
 }
 
 
-
 /* =========================
-   FIND ASSET
+   FIND ASSET FROM SHEET
 ========================= */
 
-async function findAsset(
-  assetTag
-){
+async function findAsset(assetTag) {
 
-  if(
-    !assetTag
-  ){
-
+  if (!assetTag) {
     return;
-
   }
 
 
-  showLoading(
-    assetTag
-  );
+  showLoading(assetTag);
 
 
-  try{
+  try {
 
     const res =
-      await apiScanAsset(
-        assetTag
-      );
+      await apiScanAsset(assetTag);
 
 
     console.log(
-      "Asset Response:",
+      "API Response:",
       res
     );
 
 
-    if(
-      !res
-    ){
+    if (!res) {
 
       showError(
         "Apps Script ไม่ตอบกลับ"
@@ -418,23 +241,7 @@ async function findAsset(
     }
 
 
-    if(
-      res.ok === false &&
-      res.exists === false
-    ){
-
-      showNotFound(
-        assetTag
-      );
-
-      return;
-
-    }
-
-
-    if(
-      res.error
-    ){
+    if (res.error) {
 
       showError(
         res.error
@@ -445,10 +252,21 @@ async function findAsset(
     }
 
 
-    if(
-      res.exists &&
+    if (
+      res.exists === false
+    ) {
+
+      showNotFound(assetTag);
+
+      return;
+
+    }
+
+
+    if (
+      res.exists === true &&
       res.asset
-    ){
+    ) {
 
       showAsset(
         res.asset,
@@ -460,282 +278,272 @@ async function findAsset(
     }
 
 
-    showNotFound(
-      assetTag
-    );
+    showNotFound(assetTag);
 
   }
-  catch(e){
 
-    console.error(
-      e
-    );
+  catch (error) {
 
+    console.error(error);
 
     showError(
-      e.message ||
-      String(e)
+      error.message ||
+      String(error)
     );
 
   }
 
 }
-
 
 
 /* =========================
    LOADING
 ========================= */
 
-function showLoading(
-  assetTag
-){
+function showLoading(assetTag) {
 
-  const result =
-    document.getElementById(
-      "result"
-    );
+  document
+    .getElementById("result")
+    .innerHTML =
 
+      '<div style="font-size:18px">' +
 
-  result.innerHTML =
+        'กำลังค้นหา Asset...' +
 
-    '<div style="font-size:18px;">' +
+        '<br><br>' +
 
-      'กำลังค้นหา' +
+        '<b style="font-size:25px">' +
+          escapeHtml(assetTag) +
+        '</b>' +
 
-      '<br>' +
-
-      '<b>' +
-        escapeHtml(
-          assetTag
-        ) +
-      '</b>' +
-
-    '</div>';
+      '</div>';
 
 }
-
 
 
 /* =========================
    ASSET FOUND
 ========================= */
 
-function showAsset(
-  asset,
-  history
-){
+function showAsset(asset, history) {
 
-  const result =
-    document.getElementById(
-      "result"
+  let html = "";
+
+
+  html +=
+    '<div style="text-align:left">';
+
+
+  html +=
+    '<div style="' +
+      'font-size:28px;' +
+      'font-weight:800;' +
+      'margin-bottom:5px;' +
+    '">' +
+
+      escapeHtml(
+        asset["Asset Tag"] || ""
+      ) +
+
+    '</div>';
+
+
+  html +=
+    '<div style="' +
+      'font-size:19px;' +
+      'font-weight:700;' +
+      'margin-bottom:18px;' +
+    '">' +
+
+      escapeHtml(
+        asset["Item Name"] ||
+        asset["Asset Type"] ||
+        "-"
+      ) +
+
+    '</div>';
+
+
+  html +=
+    infoRow(
+      "Asset Type",
+      asset["Asset Type"]
     );
 
 
-  let historyHtml =
-    "";
+  html +=
+    infoRow(
+      "Brand",
+      asset["Brand"]
+    );
 
 
-  for(
-    let i = 0;
-    i < history.length;
-    i++
-  ){
-
-    const h =
-      history[i];
+  html +=
+    infoRow(
+      "Model",
+      asset["Model"]
+    );
 
 
-    historyHtml +=
+  html +=
+    infoRow(
+      "Serial No.",
+      asset["Serial No."]
+    );
 
+
+  html +=
+    infoRow(
+      "User",
+      asset["User"]
+    );
+
+
+  html +=
+    infoRow(
+      "Department",
+      asset["Department"]
+    );
+
+
+  html +=
+    infoRow(
+      "Location",
+      asset["Location"]
+    );
+
+
+  html +=
+    infoRow(
+      "Status",
+      asset["Status"]
+    );
+
+
+  html +=
+    infoRow(
+      "Condition",
+      asset["Condition"]
+    );
+
+
+  if (
+    history &&
+    history.length > 0
+  ) {
+
+    html +=
       '<div style="' +
-        'padding:9px 0;' +
-        'border-bottom:1px solid #dfe5e9;' +
-        'font-size:13px;' +
-        'text-align:left;' +
+        'margin-top:20px;' +
+        'font-size:16px;' +
+        'font-weight:700;' +
       '">' +
 
-        '<b>' +
-          escapeHtml(
-            h.Type || ""
-          ) +
-        '</b>' +
-
-        ' · ' +
-
-        escapeHtml(
-          h.Timestamp || ""
-        ) +
-
-        '<br>' +
-
-        escapeHtml(
-          h[
-            "From Location"
-          ] || ""
-        ) +
-
-        ' → ' +
-
-        escapeHtml(
-          h[
-            "To Location"
-          ] || ""
-        ) +
+        'ประวัติล่าสุด' +
 
       '</div>';
+
+
+    for (
+      let i = 0;
+      i < history.length;
+      i++
+    ) {
+
+      const h =
+        history[i];
+
+
+      html +=
+        '<div style="' +
+          'padding:10px 0;' +
+          'border-bottom:1px solid #ddd;' +
+          'font-size:13px;' +
+        '">' +
+
+
+          '<b>' +
+            escapeHtml(
+              h["Type"] || ""
+            ) +
+          '</b>' +
+
+
+          ' · ' +
+
+
+          escapeHtml(
+            h["Timestamp"] || ""
+          ) +
+
+
+          '<br>' +
+
+
+          escapeHtml(
+            h["From Location"] || ""
+          ) +
+
+
+          ' → ' +
+
+
+          escapeHtml(
+            h["To Location"] || ""
+          ) +
+
+
+        '</div>';
+
+    }
 
   }
 
 
-  result.innerHTML =
-
-    '<div style="text-align:left;">' +
-
-      '<div style="' +
-        'font-size:28px;' +
-        'font-weight:800;' +
-        'margin-bottom:5px;' +
-      '">' +
-
-        escapeHtml(
-          asset[
-            "Asset Tag"
-          ] || ""
-        ) +
-
-      '</div>' +
-
-
-      '<div style="' +
-        'font-size:18px;' +
+  html +=
+    '<button ' +
+      'onclick="openScanner()" ' +
+      'style="' +
+        'width:100%;' +
+        'margin-top:20px;' +
+        'padding:15px;' +
+        'border:0;' +
+        'border-radius:12px;' +
+        'background:#1769aa;' +
+        'color:white;' +
+        'font-size:16px;' +
         'font-weight:700;' +
-        'margin-bottom:15px;' +
       '">' +
 
-        escapeHtml(
-          asset[
-            "Item Name"
-          ]
-          ||
-          asset[
-            "Asset Type"
-          ]
-          ||
-          "-"
-        ) +
+      '📷 สแกน Asset ตัวต่อไป' +
 
-      '</div>' +
+    '</button>';
 
 
-      infoRow(
-        "Asset Type",
-        asset[
-          "Asset Type"
-        ]
-      ) +
-
-      infoRow(
-        "Brand",
-        asset.Brand
-      ) +
-
-      infoRow(
-        "Model",
-        asset.Model
-      ) +
-
-      infoRow(
-        "Serial No.",
-        asset[
-          "Serial No."
-        ]
-      ) +
-
-      infoRow(
-        "User",
-        asset.User
-      ) +
-
-      infoRow(
-        "Department",
-        asset.Department
-      ) +
-
-      infoRow(
-        "Location",
-        asset.Location
-      ) +
-
-      infoRow(
-        "Status",
-        asset.Status
-      ) +
-
-      infoRow(
-        "Condition",
-        asset.Condition
-      ) +
-
-
-      (
-        historyHtml
-        ?
-        '<div style="' +
-          'margin-top:18px;' +
-          'font-weight:700;' +
-        '">' +
-          'ประวัติล่าสุด' +
-        '</div>' +
-
-        historyHtml
-
-        :
-        ''
-      ) +
-
-
-      '<button ' +
-        'onclick="openScanner()" ' +
-        'style="' +
-          'width:100%;' +
-          'margin-top:18px;' +
-          'padding:14px;' +
-          'border:0;' +
-          'border-radius:12px;' +
-          'background:#1769aa;' +
-          'color:white;' +
-          'font-size:16px;' +
-          'font-weight:700;' +
-        '">' +
-
-        '📷 สแกน Asset ตัวต่อไป' +
-
-      '</button>' +
-
+  html +=
     '</div>';
 
-}
 
+  document
+    .getElementById("result")
+    .innerHTML = html;
+
+}
 
 
 /* =========================
    INFO ROW
 ========================= */
 
-function infoRow(
-  label,
-  value
-){
+function infoRow(label, value) {
 
-  if(
+  if (
     value === undefined ||
     value === null ||
     value === ""
-  ){
+  ) {
 
-    value =
-      "-";
+    value = "-";
 
   }
 
@@ -745,9 +553,9 @@ function infoRow(
     '<div style="' +
       'display:flex;' +
       'justify-content:space-between;' +
-      'gap:15px;' +
-      'padding:9px 0;' +
-      'border-bottom:1px solid #e7ebee;' +
+      'gap:20px;' +
+      'padding:10px 0;' +
+      'border-bottom:1px solid #e3e7ea;' +
       'font-size:15px;' +
     '">' +
 
@@ -755,9 +563,7 @@ function infoRow(
         'color:#6b7680;' +
       '">' +
 
-        escapeHtml(
-          label
-        ) +
+        escapeHtml(label) +
 
       '</span>' +
 
@@ -765,9 +571,7 @@ function infoRow(
         'text-align:right;' +
       '">' +
 
-        escapeHtml(
-          value
-        ) +
+        escapeHtml(value) +
 
       '</b>' +
 
@@ -778,145 +582,130 @@ function infoRow(
 }
 
 
-
 /* =========================
    NOT FOUND
 ========================= */
 
-function showNotFound(
-  assetTag
-){
+function showNotFound(assetTag) {
 
-  const result =
-    document.getElementById(
-      "result"
-    );
+  document
+    .getElementById("result")
+    .innerHTML =
 
-
-  result.innerHTML =
-
-    '<div style="' +
-      'color:#c0392b;' +
-      'font-size:21px;' +
-      'font-weight:700;' +
-    '">' +
-
-      'ไม่พบ Asset' +
-
-    '</div>' +
-
-    '<div style="' +
-      'font-size:26px;' +
-      'font-weight:800;' +
-      'margin-top:8px;' +
-    '">' +
-
-      escapeHtml(
-        assetTag
-      ) +
-
-    '</div>' +
-
-    '<div style="' +
-      'font-size:14px;' +
-      'margin-top:10px;' +
-      'color:#6b7680;' +
-    '">' +
-
-      'Asset Tag นี้ยังไม่มีใน Assets_Master' +
-
-    '</div>' +
-
-    '<button ' +
-      'onclick="openScanner()" ' +
-      'style="' +
-        'width:100%;' +
-        'margin-top:18px;' +
-        'padding:14px;' +
-        'border:0;' +
-        'border-radius:12px;' +
-        'background:#1769aa;' +
-        'color:white;' +
-        'font-size:16px;' +
+      '<div style="' +
+        'color:#c0392b;' +
+        'font-size:22px;' +
         'font-weight:700;' +
       '">' +
 
-      '📷 สแกนใหม่' +
+        'ไม่พบ Asset' +
 
-    '</button>';
+      '</div>' +
+
+
+      '<div style="' +
+        'font-size:28px;' +
+        'font-weight:800;' +
+        'margin-top:10px;' +
+      '">' +
+
+        escapeHtml(assetTag) +
+
+      '</div>' +
+
+
+      '<div style="' +
+        'color:#6b7680;' +
+        'font-size:14px;' +
+        'margin-top:10px;' +
+      '">' +
+
+        'ไม่พบ Asset Tag นี้ใน Assets_Master' +
+
+      '</div>' +
+
+
+      '<button ' +
+        'onclick="openScanner()" ' +
+        'style="' +
+          'width:100%;' +
+          'margin-top:20px;' +
+          'padding:15px;' +
+          'border:0;' +
+          'border-radius:12px;' +
+          'background:#1769aa;' +
+          'color:white;' +
+          'font-size:16px;' +
+          'font-weight:700;' +
+        '">' +
+
+        '📷 สแกนใหม่' +
+
+      '</button>';
 
 }
-
 
 
 /* =========================
    ERROR
 ========================= */
 
-function showError(
-  message
-){
+function showError(message) {
 
-  const result =
-    document.getElementById(
-      "result"
-    );
+  document
+    .getElementById("result")
+    .innerHTML =
 
-
-  result.innerHTML =
-
-    '<div style="' +
-      'color:#c0392b;' +
-      'font-size:20px;' +
-      'font-weight:700;' +
-    '">' +
-
-      'เกิดข้อผิดพลาด' +
-
-    '</div>' +
-
-    '<div style="' +
-      'margin-top:10px;' +
-      'font-size:14px;' +
-    '">' +
-
-      escapeHtml(
-        message
-      ) +
-
-    '</div>' +
-
-    '<button ' +
-      'onclick="openScanner()" ' +
-      'style="' +
-        'width:100%;' +
-        'margin-top:18px;' +
-        'padding:14px;' +
-        'border:0;' +
-        'border-radius:12px;' +
-        'background:#1769aa;' +
-        'color:white;' +
-        'font-size:16px;' +
+      '<div style="' +
+        'color:#c0392b;' +
+        'font-size:22px;' +
         'font-weight:700;' +
       '">' +
 
-      'ลองสแกนใหม่' +
+        'เกิดข้อผิดพลาด' +
 
-    '</button>';
+      '</div>' +
+
+
+      '<div style="' +
+        'font-size:14px;' +
+        'margin-top:10px;' +
+        'word-break:break-word;' +
+      '">' +
+
+        escapeHtml(message) +
+
+      '</div>' +
+
+
+      '<button ' +
+        'onclick="openScanner()" ' +
+        'style="' +
+          'width:100%;' +
+          'margin-top:20px;' +
+          'padding:15px;' +
+          'border:0;' +
+          'border-radius:12px;' +
+          'background:#1769aa;' +
+          'color:white;' +
+          'font-size:16px;' +
+          'font-weight:700;' +
+        '">' +
+
+        'ลองสแกนใหม่' +
+
+      '</button>';
 
 }
-
 
 
 /* =========================
    CLOSE SCANNER
 ========================= */
 
-async function closeScanner(){
+async function closeScanner() {
 
-  if(
-    !scanner
-  ){
+  if (!scanner) {
 
     resetScannerUI();
 
@@ -933,24 +722,26 @@ async function closeScanner(){
     null;
 
 
-  try{
+  try {
 
     await oldScanner.stop();
 
   }
-  catch(e){
+
+  catch (e) {
 
     console.log(e);
 
   }
 
 
-  try{
+  try {
 
     oldScanner.clear();
 
   }
-  catch(e){}
+
+  catch (e) {}
 
 
   resetScannerUI();
@@ -958,57 +749,37 @@ async function closeScanner(){
 }
 
 
-
 /* =========================
    RESET UI
 ========================= */
 
-function resetScannerUI(){
+function resetScannerUI() {
 
   document
-    .getElementById(
-      "readerBox"
-    )
-    .classList
-    .add(
-      "hidden"
-    );
+    .getElementById("readerBox")
+    .classList.add("hidden");
 
 
   document
-    .getElementById(
-      "openBtn"
-    )
-    .classList
-    .remove(
-      "hidden"
-    );
+    .getElementById("openBtn")
+    .classList.remove("hidden");
 
 
   document
-    .getElementById(
-      "closeBtn"
-    )
-    .classList
-    .add(
-      "hidden"
-    );
+    .getElementById("closeBtn")
+    .classList.add("hidden");
 
 
-  scanLock =
-    false;
+  scanLock = false;
 
 }
 
 
-
 /* =========================
-   ESCAPE HTML
+   HTML ESCAPE
 ========================= */
 
-function escapeHtml(
-  value
-){
+function escapeHtml(value) {
 
   return String(
     value == null
@@ -1017,24 +788,15 @@ function escapeHtml(
   )
   .replace(
     /[&<>"']/g,
-    function(c){
+    function (c) {
 
       const map = {
 
-        "&":
-          "&amp;",
-
-        "<":
-          "&lt;",
-
-        ">":
-          "&gt;",
-
-        '"':
-          "&quot;",
-
-        "'":
-          "&#39;"
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
 
       };
 
@@ -1044,21 +806,4 @@ function escapeHtml(
     }
   );
 
-}
-async function testConnectionNow() {
-  try {
-    const res = await testAPI();
-
-    alert(
-      res && res.ok
-        ? "เชื่อม API สำเร็จ ✅\n" + res.message
-        : "เชื่อมได้ แต่ API ตอบผิดพลาด ❌"
-    );
-
-    console.log(res);
-
-  } catch (e) {
-    alert("เชื่อม API ไม่สำเร็จ ❌\n" + e.message);
-    console.error(e);
-  }
 }
