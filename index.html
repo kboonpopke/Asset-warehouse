@@ -1,1 +1,96 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
 
+  <meta name="viewport"
+        content="width=device-width,
+        initial-scale=1,
+        maximum-scale=1,
+        user-scalable=no">
+
+  <title>Asset QR Scanner</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <h1>Asset QR Scanner</h1>
+
+    <p class="sub">
+      ทดสอบกล้องมือถือก่อนเชื่อมระบบคลัง
+    </p>
+
+
+    <div class="card">
+
+      <button
+        id="openBtn"
+        class="primary"
+        onclick="openScanner()">
+
+        📷 เปิดกล้องสแกน QR
+
+      </button>
+
+      <button
+        id="closeBtn"
+        class="danger hidden"
+        onclick="closeScanner()">
+
+        ✕ ปิดกล้อง
+
+      </button>
+
+
+      <div
+        id="readerBox"
+        class="hidden">
+
+        <div id="reader"></div>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>ค่าที่อ่านได้</h2>
+
+      <div
+        id="result"
+        class="result">
+
+        ยังไม่ได้สแกน
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <label>
+        Asset Tag
+      </label>
+
+      <input
+        id="assetTag"
+        type="text"
+        placeholder="ค่าจาก QR จะมาอยู่ตรงนี้">
+
+    </div>
+
+  </div>
+
+
+  <script src="script.js"></script>
+
+</body>
+</html>
