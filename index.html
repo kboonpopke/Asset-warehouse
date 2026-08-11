@@ -14,9 +14,7 @@
 
   <title>Asset Warehouse</title>
 
-  <link
-    rel="stylesheet"
-    href="style.css">
+  <link rel="stylesheet" href="style.css">
 
   <script
     src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js">
@@ -32,149 +30,271 @@
 
   <!-- HEADER -->
 
-  <div style="margin-bottom:18px;">
+  <header>
 
-    <h1 style="margin-bottom:4px;">
-      Asset Warehouse
-    </h1>
+    <div>
 
-    <div class="sub">
-      QR Asset Management
-    </div>
+      <h1>
+        Asset Warehouse
+      </h1>
 
-  </div>
-
-
-
-  <!-- SCANNER -->
-
-  <div class="card">
-
-    <button
-      id="openBtn"
-      class="primary"
-      onclick="openScanner()">
-
-      📷 สแกน Asset QR
-
-    </button>
-
-
-    <button
-      id="closeBtn"
-      class="danger hidden"
-      onclick="closeScanner()">
-
-      ✕ ปิดกล้อง
-
-    </button>
-
-
-    <div
-      id="readerBox"
-      class="hidden">
-
-      <div
-        style="
-          text-align:center;
-          margin:10px 0;
-          font-weight:bold;
-        ">
-
-        นำ QR Asset Tag เข้าในกรอบ
-
-      </div>
-
-
-      <div id="reader"></div>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- RESULT -->
-
-  <div class="card">
-
-    <h2>
-      ข้อมูล Asset
-    </h2>
-
-
-    <div
-      id="result"
-      class="result">
-
-      <div
-        style="
-          padding:25px 10px;
-          text-align:center;
-        ">
-
-        <div
-          style="
-            font-size:50px;
-            margin-bottom:15px;
-          ">
-          ▦
-        </div>
-
-
-        <div
-          style="
-            font-size:20px;
-            font-weight:bold;
-          ">
-
-          พร้อมสแกน Asset Tag
-
-        </div>
-
-
-        <div
-          style="
-            color:#6b7680;
-            font-size:14px;
-            margin-top:8px;
-          ">
-
-          กดปุ่มด้านบนแล้วสแกน QR
-
-        </div>
-
+      <div class="sub">
+        QR Asset Management
       </div>
 
     </div>
 
-  </div>
+    <button
+      class="btn-light small"
+      onclick="showDashboard()">
+
+      📊 Dashboard
+
+    </button>
+
+  </header>
 
 
 
-  <!-- ASSET TAG -->
+  <!-- OPERATOR -->
 
-  <div class="card">
+  <section class="card">
+
+    <label>
+      👤 ผู้ทำรายการ
+    </label>
+
+    <input
+      id="operator"
+      type="text"
+      autocomplete="off"
+      placeholder="กรอกชื่อผู้ทำรายการ"
+      onchange="saveOperator()">
+
+  </section>
+
+
+
+  <!-- MAIN MENU -->
+
+  <section class="card">
+
+    <div class="menu-grid">
+
+      <button
+        class="menu primary"
+        onclick="openScanner('LOOKUP')">
+
+        📷
+        <span>สแกน Asset</span>
+
+      </button>
+
+
+      <button
+        class="menu"
+        onclick="showNewAsset()">
+
+        ➕
+        <span>รับ Asset ใหม่</span>
+
+      </button>
+
+
+      <button
+        class="menu"
+        onclick="openScanner('ISSUE')">
+
+        📤
+        <span>เบิก / จ่าย</span>
+
+      </button>
+
+
+      <button
+        class="menu"
+        onclick="openScanner('RETURN')">
+
+        📥
+        <span>คืน Asset</span>
+
+      </button>
+
+
+      <button
+        class="menu"
+        onclick="openScanner('MOVE')">
+
+        🔄
+        <span>ย้าย Location</span>
+
+      </button>
+
+
+      <button
+        class="menu"
+        onclick="openScanner('REPAIR_OUT')">
+
+        🔧
+        <span>ส่งซ่อม</span>
+
+      </button>
+
+
+      <button
+        class="menu"
+        onclick="showAuditStart()">
+
+        📋
+        <span>ตรวจนับ</span>
+
+      </button>
+
+
+      <button
+        class="menu"
+        onclick="showSearch()">
+
+        🔎
+        <span>ค้นหา</span>
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- CAMERA -->
+
+  <section
+    id="scannerCard"
+    class="card hidden">
+
+    <div class="scanner-head">
+
+      <div>
+
+        <b id="scannerTitle">
+          สแกน Asset QR
+        </b>
+
+        <div class="scanner-sub">
+          นำ QR Asset Tag เข้าในกรอบ
+        </div>
+
+      </div>
+
+
+      <button
+        class="btn-danger small"
+        onclick="closeScanner()">
+
+        ✕ ปิด
+
+      </button>
+
+    </div>
+
+
+    <div id="reader"></div>
+
+  </section>
+
+
+
+  <!-- MANUAL -->
+
+  <section class="card">
 
     <label>
       Asset Tag
     </label>
 
+    <div class="scan-input-row">
 
-    <input
-      id="assetTag"
-      type="text"
-      placeholder="ค่าจาก QR จะมาอยู่ตรงนี้"
-      readonly>
+      <input
+        id="assetTag"
+        type="text"
+        autocomplete="off"
+        placeholder="พิมพ์ Asset Tag หรือยิงด้วย PDA">
 
-  </div>
+      <button
+        class="btn-primary"
+        onclick="manualScan()">
+
+        ค้นหา
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- CONTENT -->
+
+  <main
+    id="content"
+    class="card">
+
+    <div class="empty">
+
+      <div class="empty-icon">
+        ▦
+      </div>
+
+      <b>
+        พร้อมใช้งาน
+      </b>
+
+      <span>
+        สแกน QR Asset Tag หรือเลือกเมนูด้านบน
+      </span>
+
+    </div>
+
+  </main>
 
 
 </div>
 
 
 
-<!-- สำคัญ: save.js ต้องมาก่อน -->
+<!-- MODAL -->
+
+<div
+  id="modal"
+  class="modal hidden">
+
+  <div class="modal-card">
+
+    <button
+      class="modal-close"
+      onclick="closeModal()">
+
+      ×
+
+    </button>
+
+    <div id="modalBody"></div>
+
+  </div>
+
+</div>
+
+
+
+<!-- TOAST -->
+
+<div
+  id="toast"
+  class="toast">
+</div>
+
+
 
 <script src="save.js"></script>
 
