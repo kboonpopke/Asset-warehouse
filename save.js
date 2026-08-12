@@ -1,4 +1,4 @@
-const API_URL = "PUT_YOUR_APPS_SCRIPT_EXEC_URL_HERE";
+const API_URL = "https://script.google.com/macros/s/AKfycbwl0_8C5OC4KfrpMrkUXZCq9IsgxwnUgCBu1vZiL4GOgoU9sEDfb2w2VTYKv3fU7NQO/exec";
 
 function apiRequest(action, params){
   params = params || {};
