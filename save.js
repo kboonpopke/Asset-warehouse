@@ -1,5 +1,5 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbwl0_8C5OC4KfrpMrkUXZCq9IsgxwnUgCBu1vZiL4GOgoU9sEDfb2w2VTYKv3fU7NQO/exec";
-
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbwl0_8C5OC4KfrpMrkUXZCq9IsgxwnUgCBu1vZiL4GOgoU9sEDfb2w2VTYKv3fU7NQO/exec";
 function apiRequest(action, params){
   params = params || {};
   return new Promise(function(resolve,reject){
